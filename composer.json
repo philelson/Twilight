@@ -1,0 +1,16 @@
+{
+    "name": "philelson/the-flash",
+    "description": "Hue app for controlling lights in the home / garden",
+    "type": "project",
+    "license": "BSD",
+    "authors": [
+        {
+            "name": "Phil Elson",
+            "email": "phil@pegasus-commerce.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "sqmk/phue": "~1.6.1"
+    }
+}

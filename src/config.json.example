@@ -1,0 +1,7 @@
+{
+  "hub_ip":"{hub_ip}",
+  "username":"{hub_hash}",
+  "group":2,
+  "offset_minutes":60,
+  "verbose":1
+}
