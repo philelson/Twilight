@@ -85,16 +85,20 @@ class Twilight
      */
     public function run()
     {
-        $this->_init();
-        $this->_group->setOn(false);
+        try {
+            $this->_init();
+            $this->_group->setOn(false);
 
-        do {
-            $this->_log(sprintf("Sunset is at '%s' time now is '%s'", $this->_getDateString($this->_timeOfSunset), $this->_getDateString()));
-            sleep($this->_delayBetweenCheckSeconds);
-        } while (time() < $this->_timeOfSunset);
+            do {
+                $this->_log(sprintf("Sunset is at '%s' time now is '%s'", $this->_getDateString($this->_timeOfSunset), $this->_getDateString()));
+                sleep($this->_delayBetweenCheckSeconds);
+            } while (time() < $this->_timeOfSunset);
 
-        $this->_group->setOn(true);
-        $this->_log("Lights on\nExiting");
+            $this->_group->setOn(true);
+            $this->_log("Lights on\nExiting");
+        } catch (\Exception $exception) {
+            $this->_log($exception->getMessage(), FILE_APPEND, true);
+        }
     }
 
     /**
@@ -102,7 +106,7 @@ class Twilight
      */
     protected function _init()
     {
-        $config = json_decode(file_get_contents(self::DEFAULT_CONFIG_FILE), true);
+        $config = $this->_getConfig();
 
         foreach ($this->_configIndexes as $requiredIndex) {
             if (false === isset($config[$requiredIndex])) {
@@ -125,6 +129,18 @@ class Twilight
         $this->_log(sprintf("Delay:         '%s' seconds", $this->_delayBetweenCheckSeconds));
     }
 
+    /**
+     * @return array
+     * @throws \Exception
+     */
+    protected function _getConfig()
+    {
+        if (false === file_exists(self::DEFAULT_CONFIG_FILE)) {
+            throw new \Exception(sprintf("Config file '%s' not found", self::DEFAULT_CONFIG_FILE));
+        }
+
+        return json_decode(file_get_contents(self::DEFAULT_CONFIG_FILE), true);
+    }
     /**
      * @param $config
      * @param $node
@@ -170,14 +186,15 @@ class Twilight
     /**
      * @param $message
      * @param int $flag
+     * @param bool $verbose
      */
-    protected function _log($message, $flag=FILE_APPEND)
+    protected function _log($message, $flag=FILE_APPEND, $verbose=false)
     {
         $message = (true === is_array($message)) ? print_r($message, true) : $message;
 
         file_put_contents('twilight.log', $message."\n", $flag);
 
-        if (true === $this->_verbose) {
+        if (true === $this->_verbose || true === $verbose) {
             echo $message."\n";
         }
     }
