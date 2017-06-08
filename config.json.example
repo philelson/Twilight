@@ -3,5 +3,6 @@
   "username":"{hub_hash}",
   "group":2,
   "offset_minutes":60,
-  "verbose":1
+  "verbose":1,
+  "check_delay_seconds":60
 }

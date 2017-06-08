@@ -145,7 +145,7 @@ class Twilight
      */
     protected function _getConfig()
     {
-        $pathToConfigFile = $this->_getPath(self::DEFAULT_CONFIG_FILE);
+        $pathToConfigFile = $this->_getPath('/../'.self::DEFAULT_CONFIG_FILE);
 
         if (false === file_exists($pathToConfigFile)) {
             throw new \Exception(sprintf("Config file '%s' not found", self::DEFAULT_CONFIG_FILE));
