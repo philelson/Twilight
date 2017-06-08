@@ -39,7 +39,7 @@ class Twilight extends AbstractWatcher
      */
     protected function _initLights()
     {
-        $this->_group->setOn(false);
+        $this->_group->setOn(true);
     }
 
     /**
@@ -48,7 +48,8 @@ class Twilight extends AbstractWatcher
     protected function _trigger()
     {
         $this->_group->setOn(true);
-        $this->_log("Lights on\nExiting");
+        $this->_log("Lights ON");
+        $this->_log("Exiting");
     }
 }
 ?>

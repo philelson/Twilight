@@ -94,8 +94,14 @@ abstract class AbstractWatcher
      */
     public function getThresholdName()
     {
-        $classNameParts = explode('\\', get_class($this));
-        return end($classNameParts);
+        static $thresholdName = null;
+
+        if (null === $thresholdName) {
+            $classNameParts = explode('\\', get_class($this));
+            $thresholdName  = end($classNameParts);
+        }
+
+        return $thresholdName;
     }
 
     /**
@@ -265,6 +271,7 @@ abstract class AbstractWatcher
         }
 
         $message = (true === is_array($message)) ? print_r($message, true) : $message;
+        $message = $this->getThresholdName().': '.$message;
 
         file_put_contents($pathToLog, $message."\n", $flag);
 

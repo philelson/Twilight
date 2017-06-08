@@ -23,7 +23,8 @@ class Night extends AbstractWatcher
     protected function _trigger()
     {
         $this->_group->setOn(false);
-        $this->_log("Lights OFF\nExiting");
+        $this->_log("Lights OFF");
+        $this->_log("Exiting");
     }
 
     /**
