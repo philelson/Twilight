@@ -207,7 +207,7 @@ abstract class AbstractWatcher
         $this->_offsetInMinutes = $this->_getFromConfig($config, self::CONFIG_ELEMENT_OFFSET_MINS, 0);
         $this->_loopDelay       = $this->_getFromConfig($config, self::CONFIG_ELEMENT_CHECK_DELAY, self::DEFAULT_CHECK_DELAY_SECONDS);
 
-        $this->_log(sprintf("%s watcher started at  '%s'", $this->getThresholdName(), $this->_getDateString()), null);
+        $this->_log(sprintf("%s watcher started at  '%s'", $this->getThresholdName(), $this->_getDateString()));
         $this->_log(sprintf("Config:        '%s'", $this->_getConfigFileName()));
         $this->_log(sprintf("Hub:           '%s'", $hubIp));
         if (0 != $this->_offsetInMinutes) {
