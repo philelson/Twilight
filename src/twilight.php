@@ -52,13 +52,6 @@ class Twilight
     protected $_group                       = null;
 
     /**
-     * Timestamp
-     *
-     * @var null|int
-     */
-    protected $_timeOfSunset                = null;
-
-    /**
      * @var bool
      */
     protected $_verbose                     = false;
@@ -71,7 +64,7 @@ class Twilight
     /**
      * @var int
      */
-    protected $_delayBetweenCheckSeconds    = self::DEFAULT_CHECK_DELAY_SECONDS;
+    protected $_loopDelay    = self::DEFAULT_CHECK_DELAY_SECONDS;
 
     /**
      * @var array
@@ -80,6 +73,8 @@ class Twilight
 
     /**
      * Method blocks until the sunset has passed.
+     * sleep is fine here as there's nothing else for the system to do and it will free
+     * resources for other processes.
      *
      * @throws \Exception
      */
@@ -90,15 +85,31 @@ class Twilight
             $this->_group->setOn(false);
 
             do {
-                $this->_log(sprintf("Sunset is at '%s' time now is '%s'", $this->_getDateString($this->_timeOfSunset), $this->_getDateString()));
-                sleep($this->_delayBetweenCheckSeconds);
-            } while (time() < $this->_timeOfSunset);
+                $this->_log($this->_getLoopMessage());
+                sleep($this->_loopDelay);
+            } while (time() < $this->_getSunset());
 
             $this->_group->setOn(true);
             $this->_log("Lights on\nExiting");
         } catch (\Exception $exception) {
             $this->_log($exception->getMessage(), FILE_APPEND, true);
         }
+    }
+
+    /**
+     * @return string
+     * @throws \Exception
+     */
+    protected function _getLoopMessage()
+    {
+        static $baseMessage = null;
+
+        if (null === $baseMessage) {
+            $baseMessage = sprintf("Real sunset is at '%s' ", $this->_getDateString($this->_getSunset(false)));
+            $baseMessage .= sprintf("Offset sunset is +%smins at '%s' ", $this->_offsetInMinutes, $this->_getDateString($this->_getSunset()));
+        }
+
+        return $baseMessage.sprintf("time now is '%s'", $this->_getDateString());
     }
 
     /**
@@ -119,14 +130,13 @@ class Twilight
         $this->_group           = $this->_getGroup($config[self::CONFIG_ELEMENT_GROUP]);
         $this->_verbose         = (bool)$this->_getFromConfig($config, self::CONFIG_ELEMENT_VERBOSE, false);
         $this->_offsetInMinutes = $this->_getFromConfig($config, self::CONFIG_ELEMENT_OFFSET_MINS, 0);
-        $this->_timeOfSunset    = $this->_getSunset();
-        $this->_delayBetweenCheckSeconds = $this->_getFromConfig($config, self::CONFIG_ELEMENT_CHECK_DELAY, self::DEFAULT_CHECK_DELAY_SECONDS);
+        $this->_loopDelay       = $this->_getFromConfig($config, self::CONFIG_ELEMENT_CHECK_DELAY, self::DEFAULT_CHECK_DELAY_SECONDS);
 
         $this->_log(sprintf("Twilight started at %s", $this->_getDateString()), null);
         $this->_log(sprintf("Hub:           '%s'", $hubIp));
         $this->_log(sprintf("Sunset Offset  '%s'", $this->_offsetInMinutes));
         $this->_log(sprintf("Verbosity:     '%s'", $this->_verbose));
-        $this->_log(sprintf("Delay:         '%s' seconds", $this->_delayBetweenCheckSeconds));
+        $this->_log(sprintf("Delay:         '%s' seconds", $this->_loopDelay));
     }
 
     /**
@@ -157,19 +167,26 @@ class Twilight
     }
 
     /**
+     * @param bool $offset
      * @return int
      * @throws \Exception
      */
-    protected function _getSunset()
+    protected function _getSunset($offset=true)
     {
-        $data = file_get_contents($this->_sunsetUrl);
-        $data = json_decode($data, true);
+        static $realSunset = null;
 
-        if ($data['status'] != 'OK') {
-            throw new \Exception("Status not ok");
+        if (null === $realSunset) {
+            $data = file_get_contents($this->_sunsetUrl);
+            $data = json_decode($data, true);
+
+            if ($data['status'] != 'OK') {
+                throw new \Exception("Status not ok");
+            }
+
+            $realSunset = strtotime($data['results']['sunset']);
         }
 
-        return strtotime($data['results']['sunset'])+($this->_offsetInMinutes*60);
+        return (false === $offset) ? $realSunset : $realSunset+($this->_offsetInMinutes*60);
     }
 
     /**
