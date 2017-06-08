@@ -25,51 +25,51 @@ class Twilight
     const CONFIG_ELEMENT_USERNAME           = 'username';
 
     /** config node name for the group of lights to be controlled */
-    const CONFIG_ELEMENT_GROUP              = 'group';
+    const CONFIG_ELEMENT_GROUP          = 'group';
 
     /** config node name for the verbosity 1 = file and log */
-    const CONFIG_ELEMENT_VERBOSE            = 'verbose';
+    const CONFIG_ELEMENT_VERBOSE        = 'verbose';
 
     /** config node name for the offset from the subset in mins */
-    const CONFIG_ELEMENT_OFFSET_MINS        = 'offset_minutes';
+    const CONFIG_ELEMENT_OFFSET_MINS    = 'offset_minutes';
 
     /** config node name for the delay in seconds between the subset check */
-    const CONFIG_ELEMENT_CHECK_DELAY        = 'check_delay_seconds';
+    const CONFIG_ELEMENT_CHECK_DELAY    = 'check_delay_seconds';
 
     /** URL for the subset API */
-    protected $_sunsetUrl                   = 'https://api.sunrise-sunset.org/json?lat=36.7201600&lng=-4.4203400&date=today';
+    protected $_sunsetUrl               = 'https://api.sunrise-sunset.org/json?lat=36.7201600&lng=-4.4203400&date=today';
 
     /**
      * Client object
      *
      * @var null|\Phue\Client
      */
-    protected $_client                      = null;
+    protected $_client                  = null;
 
     /**
      * @var null|\Phue\Group
      */
-    protected $_group                       = null;
+    protected $_group                   = null;
 
     /**
      * @var bool
      */
-    protected $_verbose                     = false;
+    protected $_verbose                 = false;
 
     /**
      * @var int
      */
-    protected $_offsetInMinutes             = 0;
+    protected $_offsetInMinutes         = 0;
 
     /**
      * @var int
      */
-    protected $_loopDelay    = self::DEFAULT_CHECK_DELAY_SECONDS;
+    protected $_loopDelay               = self::DEFAULT_CHECK_DELAY_SECONDS;
 
     /**
      * @var array
      */
-    protected $_configIndexes               = [self::CONFIG_ELEMENT_HUB_IP, self::CONFIG_ELEMENT_USERNAME, self::CONFIG_ELEMENT_GROUP];
+    protected $_configIndexes           = [self::CONFIG_ELEMENT_HUB_IP, self::CONFIG_ELEMENT_USERNAME, self::CONFIG_ELEMENT_GROUP];
 
     /**
      * Method blocks until the sunset has passed.
