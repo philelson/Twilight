@@ -12,5 +12,8 @@
     "minimum-stability": "dev",
     "require": {
         "sqmk/phue": "~1.6.1"
+    },
+    "autoload": {
+        "classmap": ["src/"]
     }
 }

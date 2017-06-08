@@ -1,0 +1,9 @@
+{
+  "hub_ip":"{hub_ip}",
+  "username":"{hub_hash}",
+  "offset_minutes":90,
+  "verbose":1,
+  "group":2,
+  "night_hour":22,
+  "check_delay_seconds":300
+}
