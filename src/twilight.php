@@ -1,7 +1,7 @@
 <?php
 namespace philelson\Twilight;
 
-require_once '../vendor/autoload.php';
+require_once __DIR__.'/../vendor/autoload.php';
 
 use Phue\Client;
 
@@ -13,16 +13,16 @@ use Phue\Client;
 class Twilight
 {
     /** Default name of the config file */
-    const DEFAULT_CONFIG_FILE               = 'config.json';
+    const DEFAULT_CONFIG_FILE           = 'config.json';
 
     /** Default delay between sunset checks */
-    const DEFAULT_CHECK_DELAY_SECONDS       = 60;
+    const DEFAULT_CHECK_DELAY_SECONDS   = 60;
 
     /** config node name for the hub ip address */
-    const CONFIG_ELEMENT_HUB_IP             = 'hub_ip';
+    const CONFIG_ELEMENT_HUB_IP         = 'hub_ip';
 
     /** config node name for the hub username */
-    const CONFIG_ELEMENT_USERNAME           = 'username';
+    const CONFIG_ELEMENT_USERNAME       = 'username';
 
     /** config node name for the group of lights to be controlled */
     const CONFIG_ELEMENT_GROUP          = 'group';
@@ -30,7 +30,7 @@ class Twilight
     /** config node name for the verbosity 1 = file and log */
     const CONFIG_ELEMENT_VERBOSE        = 'verbose';
 
-    /** config node name for the offset from the subset in mins */
+    /** config node name for the offset from the subset in minutes */
     const CONFIG_ELEMENT_OFFSET_MINS    = 'offset_minutes';
 
     /** config node name for the delay in seconds between the subset check */
@@ -145,11 +145,13 @@ class Twilight
      */
     protected function _getConfig()
     {
-        if (false === file_exists(self::DEFAULT_CONFIG_FILE)) {
+        $pathToConfigFile = $this->_getPath(self::DEFAULT_CONFIG_FILE);
+
+        if (false === file_exists($pathToConfigFile)) {
             throw new \Exception(sprintf("Config file '%s' not found", self::DEFAULT_CONFIG_FILE));
         }
 
-        return json_decode(file_get_contents(self::DEFAULT_CONFIG_FILE), true);
+        return json_decode(file_get_contents($pathToConfigFile), true);
     }
     /**
      * @param $config
@@ -207,9 +209,15 @@ class Twilight
      */
     protected function _log($message, $flag=FILE_APPEND, $verbose=false)
     {
+        static $pathToLog = null;
+
+        if (null === $pathToLog) {
+            $pathToLog = $this->_getPath('../twilight.log');
+        }
+
         $message = (true === is_array($message)) ? print_r($message, true) : $message;
 
-        file_put_contents('twilight.log', $message."\n", $flag);
+        file_put_contents($pathToLog, $message."\n", $flag);
 
         if (true === $this->_verbose || true === $verbose) {
             echo $message."\n";
@@ -225,6 +233,15 @@ class Twilight
         $timestamp = (null === $timestamp) ? time() : $timestamp;
 
         return date("D M j G:i:s T Y", $timestamp);
+    }
+
+    /**
+     * @param $fileName
+     * @return string
+     */
+    protected function _getPath($fileName)
+    {
+        return (__DIR__.'/'.$fileName);
     }
 }
 
