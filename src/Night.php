@@ -5,6 +5,9 @@ namespace philelson\Twilight;
  * Class Twilight
  * @package philelson\Twilight
  * @author Phil Elson <phil@pegasus-commerce.com>
+ *
+ * Why do it this way rather than a cron which runs at X time and a simple version of this
+ * which simply turns the group off?... simple, I was having fun.
  */
 class Night extends AbstractWatcher
 {

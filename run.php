@@ -9,7 +9,8 @@ require_once __DIR__.'/vendor/autoload.php';
 use philelson\Twilight\Twilight;
 use philelson\Twilight\Night;
 
-$classes = [new Twilight(), new Night()];
+$classes    = [new Twilight(), new Night()];
+$executed   = false;
 
 /** @var philelson\Twilight\AbstractWatcher $watcher */
 foreach($classes as $watcher) {
@@ -20,5 +21,10 @@ foreach($classes as $watcher) {
     }
 
     $watcher->run();
+    $executed = true;
+}
+
+if (false === $executed) {
+    echo "Command does not match any watchers \n";
 }
 ?>
