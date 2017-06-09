@@ -2,21 +2,21 @@ Simple script to turn on a group of hue lights at sunset+x
 
 ### Turning a group on at twilight
 1. Configure config.json (see the example)
-..1. Set the group you want to control
-..2. Set the username hash from the hub
-..3. Set the IP address of the hub
-..4. Set the offset between sunset and when you want the lights on
-..5. Set the loop delay
-2. Execute `php run twilight`
+  1. Set the group you want to control
+  2. Set the username hash from the hub
+  3. Set the IP address of the hub
+  4. Set the offset between sunset and when you want the lights on
+  5. Set the loop delay
+2. Execute `php run.php twilight`
 
 ### Turning a group off at night
 1. Configure night_config.json (see the example)
-..1. Set the group you want to control
-..2. Set the username hash from the hub
-..3. Set the IP address of the hub
-..4. Set the offset between sunset and when you want the lights on
-..5. Set the loop delay
-2. Execute `php run night` 
+  1. Set the group you want to control
+  2. Set the username hash from the hub
+  3. Set the IP address of the hub
+  4. Set the offset between sunset and when you want the lights on
+  5. Set the loop delay
+2. Execute `php run.php night` 
 
 ### Configure the cron
 
