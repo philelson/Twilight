@@ -35,14 +35,6 @@ class Twilight extends AbstractWatcher
     }
 
     /**
-     * Turn lights off
-     */
-    protected function _initLights()
-    {
-        $this->_group->setOn(true);
-    }
-
-    /**
      *
      */
     protected function _trigger()

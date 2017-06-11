@@ -130,13 +130,13 @@ abstract class AbstractWatcher
     }
 
     /**
-     * Initial state for the lights
+     * Turn lights off
      *
      * @return void
      */
     protected function _initLights()
     {
-
+        $this->_group->setOn(false);
     }
 
     /**
