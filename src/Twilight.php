@@ -35,7 +35,7 @@ class Twilight extends AbstractWatcher
     }
 
     /**
-     *
+     * Turn the lights on
      */
     protected function _trigger()
     {

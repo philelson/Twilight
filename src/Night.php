@@ -38,7 +38,7 @@ class Night extends AbstractWatcher
      */
     protected function _getThreshold($offset = true)
     {
-        return strtotime('today 22:00');
+        return strtotime(sprintf('today %s:00', (int)$this->_nightHour));
     }
 
     /**
@@ -64,7 +64,7 @@ class Night extends AbstractWatcher
      * @return string
      * @throws \Exception
      */
-    protected function _getLoopMessage()
+    protected function _getTimeMessage()
     {
         static $baseMessage = null;
 
@@ -73,7 +73,9 @@ class Night extends AbstractWatcher
             $baseMessage    = sprintf("Real %s is at '%s' ", $thresholdName, $this->_getDateString($this->_getThreshold(false)));
         }
 
-        return $baseMessage.sprintf("time now is '%s'", $this->_getDateString());
+        $looping = (true === $this->_while()) ? '- starting loop' : '';
+
+        return $baseMessage.sprintf("time now is '%s' %s", $this->_getDateString(), $looping);
     }
 
     /**

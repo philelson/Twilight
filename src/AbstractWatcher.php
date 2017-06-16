@@ -78,11 +78,13 @@ abstract class AbstractWatcher
         try {
             $this->_init();
             $this->_initLights();
+            $this->_beforeLoop();
 
             do {
                 $this->_loop();
             } while (true === $this->_while());
 
+            $this->_afterLoop();
             $this->_trigger();
         } catch (\Exception $exception) {
             $this->_exception($exception);
@@ -140,6 +142,30 @@ abstract class AbstractWatcher
     }
 
     /**
+     * Runs before the main loop
+     */
+    protected function _beforeLoop()
+    {
+        $this->_log($this->_getTimeMessage());
+    }
+
+    /**
+     * Loop body
+     */
+    protected function _loop()
+    {
+        sleep($this->_loopDelay);
+    }
+
+    /**
+     * Runs after the main loop, before the trigger
+     */
+    protected function _afterLoop()
+    {
+        $this->_log($this->_getTimeMessage());
+    }
+
+    /**
      * Default handling of an exception
      *
      * @param \Exception $exception
@@ -150,19 +176,10 @@ abstract class AbstractWatcher
     }
 
     /**
-     * Loop body
-     */
-    protected function _loop()
-    {
-        $this->_log($this->_getLoopMessage());
-        sleep($this->_loopDelay);
-    }
-
-    /**
      * @return string
      * @throws \Exception
      */
-    protected function _getLoopMessage()
+    protected function _getTimeMessage()
     {
         static $baseMessage = null;
 
@@ -172,7 +189,9 @@ abstract class AbstractWatcher
             $baseMessage    .= sprintf("Offset %s is +%smins at '%s' ", $thresholdName, $this->_offsetInMinutes, $this->_getDateString($this->_getThreshold()));
         }
 
-        return $baseMessage.sprintf("time now is '%s'", $this->_getDateString());
+        $looping = (true === $this->_while()) ? 'starting loop' : '';
+
+        return $baseMessage.sprintf("time now is '%s' - %s", $this->_getDateString(), $looping);
     }
 
     /**
