@@ -210,6 +210,7 @@ abstract class AbstractWatcher
         $this->_client = new Client($config[self::CONFIG_ELEMENT_HUB_IP], $config[self::CONFIG_ELEMENT_USERNAME]);
 
         $this->_initFromConfig($config);
+        $this->_logInitMessage(true);
     }
 
     /**
@@ -227,13 +228,40 @@ abstract class AbstractWatcher
         $this->_loopDelay       = $this->_getFromConfig($config, self::CONFIG_ELEMENT_CHECK_DELAY, self::DEFAULT_CHECK_DELAY_SECONDS);
 
         $this->_log(sprintf("%s watcher started at  '%s'", $this->getThresholdName(), $this->_getDateString()));
-        $this->_log(sprintf("Config:        '%s'", $this->_getConfigFileName()));
-        $this->_log(sprintf("Hub:           '%s'", $hubIp));
+        $this->_logInitMessage('Config', $this->_getConfigFileName());
+        $this->_logInitMessage('Hub', $hubIp);
         if (0 != $this->_offsetInMinutes) {
-            $this->_log(sprintf("%s Offset  '%s'", $this->getThresholdName(), $this->_offsetInMinutes));
+            $this->_logInitMessage(sprintf("%s Offset", $this->getThresholdName()), $this->_offsetInMinutes);
         }
-        $this->_log(sprintf("Verbosity:     '%s'", $this->_verbose));
-        $this->_log(sprintf("Loop Delay:    '%s' seconds", $this->_loopDelay));
+        $this->_logInitMessage('Verbosity', ($this->_verbose) ? 'high' : 'low');
+        $this->_logInitMessage('Loop Delay', $this->_loopDelay);
+    }
+
+    /**
+     * @param $label
+     * @param $message
+     */
+    protected function _logInitMessage($label, $message=null)
+    {
+        static $messages            = [];
+        static $longestLabelLength  = 0;
+
+        if (true !== $label) {
+            $messages[]      = ['message' => $message, 'label' => $label];
+            if (strlen($label) >= $longestLabelLength) {
+                $longestLabelLength = strlen($label);
+            }
+            return;
+        }
+
+        $padding = function($label, $max) {
+            return (str_repeat(' ', $max - strlen($label) + 5));
+        };
+
+        foreach($messages as $message) {
+            $label = $message['label'];
+            $this->_log(sprintf('%s: %s %s', $label, $padding($label, $longestLabelLength), $message['message']));
+        }
     }
 
     /**

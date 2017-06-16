@@ -57,7 +57,7 @@ class Night extends AbstractWatcher
             throw new \Exception(sprintf("Hour (night_hour) must be between 0 and 24, %s found", $this->_nightHour));
         }
 
-        $this->_log(sprintf("Night Hour:    '%s'", $this->_nightHour));
+        $this->_logInitMessage("Night Hour", $this->_nightHour);
     }
 
     /**
