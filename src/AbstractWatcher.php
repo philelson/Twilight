@@ -67,6 +67,16 @@ abstract class AbstractWatcher
     protected $_configIndexes           = [self::CONFIG_ELEMENT_HUB_IP, self::CONFIG_ELEMENT_USERNAME, self::CONFIG_ELEMENT_GROUP];
 
     /**
+     * Log message cache
+     *
+     * @var array
+     */
+    protected $_initMessages            = [];
+
+    /** @var int  */
+    protected $_maxLengthLabel          = 0;
+
+    /**
      * Method blocks until the sunset has passed.
      * sleep is fine here as there's nothing else for the system to do and it will free
      * resources for other processes.
@@ -86,6 +96,7 @@ abstract class AbstractWatcher
 
             $this->_afterLoop();
             $this->_trigger();
+
         } catch (\Exception $exception) {
             $this->_exception($exception);
         }
@@ -147,6 +158,7 @@ abstract class AbstractWatcher
     protected function _beforeLoop()
     {
         $this->_log($this->_getTimeMessage());
+        $this->_logFormattedMessages();
     }
 
     /**
@@ -185,13 +197,14 @@ abstract class AbstractWatcher
 
         if (null === $baseMessage) {
             $thresholdName  = $this->getThresholdName();
-            $baseMessage    = sprintf("Real %s is at '%s' ", $thresholdName, $this->_getDateString($this->_getThreshold(false)));
-            $baseMessage    .= sprintf("Offset %s is +%smins at '%s' ", $thresholdName, $this->_offsetInMinutes, $this->_getDateString($this->_getThreshold()));
+            $this->_addFormattedMessage(sprintf("Real %s", $thresholdName), $this->_getDateString($this->_getThreshold(false)));
+            $this->_addFormattedMessage(sprintf("Offset %s", $thresholdName), $this->_offsetInMinutes);
+            $this->_addFormattedMessage(sprintf("Offset %s time ", $thresholdName), $this->_getDateString($this->_getThreshold()));
         }
 
-        $looping = (true === $this->_while()) ? 'starting loop' : '';
-
-        return $baseMessage.sprintf("time now is '%s' - %s", $this->_getDateString(), $looping);
+        $looping = (true === $this->_while()) ? 'starting' : 'finishing';
+        $this->_addFormattedMessage("Current time", $this->_getDateString());
+        $this->_addFormattedMessage("Loop", $looping);
     }
 
     /**
@@ -210,7 +223,6 @@ abstract class AbstractWatcher
         $this->_client = new Client($config[self::CONFIG_ELEMENT_HUB_IP], $config[self::CONFIG_ELEMENT_USERNAME]);
 
         $this->_initFromConfig($config);
-        $this->_logInitMessage(true);
     }
 
     /**
@@ -227,41 +239,45 @@ abstract class AbstractWatcher
         $this->_offsetInMinutes = $this->_getFromConfig($config, self::CONFIG_ELEMENT_OFFSET_MINS, 0);
         $this->_loopDelay       = $this->_getFromConfig($config, self::CONFIG_ELEMENT_CHECK_DELAY, self::DEFAULT_CHECK_DELAY_SECONDS);
 
-        $this->_log(sprintf("%s watcher started at  '%s'", $this->getThresholdName(), $this->_getDateString()));
-        $this->_logInitMessage('Config', $this->_getConfigFileName());
-        $this->_logInitMessage('Hub', $hubIp);
+        $this->_addFormattedMessage(sprintf("%s watcher started at", $this->getThresholdName()),  $this->_getDateString());
+        $this->_addFormattedMessage('Config', $this->_getConfigFileName());
+        $this->_addFormattedMessage('Hub', $hubIp);
         if (0 != $this->_offsetInMinutes) {
-            $this->_logInitMessage(sprintf("%s Offset", $this->getThresholdName()), $this->_offsetInMinutes);
+            $this->_addFormattedMessage(sprintf("%s Offset", $this->getThresholdName()), $this->_offsetInMinutes);
         }
-        $this->_logInitMessage('Verbosity', ($this->_verbose) ? 'high' : 'low');
-        $this->_logInitMessage('Loop Delay', $this->_loopDelay);
+        $this->_addFormattedMessage('Verbosity', ($this->_verbose) ? 'high' : 'low');
+        $this->_addFormattedMessage('Loop Delay', $this->_loopDelay);
     }
 
     /**
      * @param $label
      * @param $message
      */
-    protected function _logInitMessage($label, $message=null)
+    protected function _addFormattedMessage($label, $message=null)
     {
-        static $messages            = [];
-        static $longestLabelLength  = 0;
+        $this->_initMessages[$label] = $message;
 
-        if (true !== $label) {
-            $messages[]      = ['message' => $message, 'label' => $label];
-            if (strlen($label) >= $longestLabelLength) {
-                $longestLabelLength = strlen($label);
-            }
+        if (0 === $this->_maxLengthLabel) {
             return;
         }
 
-        $padding = function($label, $max) {
-            return (str_repeat(' ', $max - strlen($label) + 5));
-        };
+        $this->_logFormattedMessages();
+    }
 
-        foreach($messages as $message) {
-            $label = $message['label'];
-            $this->_log(sprintf('%s: %s %s', $label, $padding($label, $longestLabelLength), $message['message']));
+    /**
+     * Logs the cache.
+     * The main reason is to calculate the padding between the label and the message so each line
+     * is a consistent format - pedantic
+     */
+    protected function _logFormattedMessages()
+    {
+        $this->_maxLengthLabel = max(array_map('strlen', array_keys($this->_initMessages)));
+
+        foreach($this->_initMessages as $label => $message) {
+            $this->_log(sprintf('%s: %s %s', $label, str_repeat(' ', $this->_maxLengthLabel - strlen($label)), $message));
         }
+
+        $this->_initMessages = [];
     }
 
     /**

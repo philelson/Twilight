@@ -57,7 +57,7 @@ class Night extends AbstractWatcher
             throw new \Exception(sprintf("Hour (night_hour) must be between 0 and 24, %s found", $this->_nightHour));
         }
 
-        $this->_logInitMessage("Night Hour", $this->_nightHour);
+        $this->_addFormattedMessage("Night Hour", $this->_nightHour);
     }
 
     /**
@@ -70,12 +70,11 @@ class Night extends AbstractWatcher
 
         if (null === $baseMessage) {
             $thresholdName  = $this->getThresholdName();
-            $baseMessage    = sprintf("Real %s is at '%s' ", $thresholdName, $this->_getDateString($this->_getThreshold(false)));
+            $this->_addFormattedMessage(sprintf("Real %s", $thresholdName), $this->_getDateString($this->_getThreshold(false)));
         }
 
-        $looping = (true === $this->_while()) ? '- starting loop' : '';
-
-        return $baseMessage.sprintf("time now is '%s' %s", $this->_getDateString(), $looping);
+        $looping = (true === $this->_while()) ? 'starting' : 'finishing';
+        $this->_addFormattedMessage("Loop", $looping);
     }
 
     /**
